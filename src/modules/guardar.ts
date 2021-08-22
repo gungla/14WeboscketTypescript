@@ -1,12 +1,13 @@
-import Producto from '../class/producto.js';
-import Message from '../class/message.js';
+import Producto from '../class/producto';
+import Message from '../class/message';
 import moment from 'moment';
-import { productos, dbIDs, lastID, messages } from './data.js';
-import { guardarMessages } from './../modules/app.js';
+import { productos, dbIDs, lastID, messages } from './data';
+import { guardarMessages } from './app';
 
-export function guardarFromForm(data) {
+//Función encargada de validad y guardar el form cuando se llama desde el websocket
+export function guardarFromForm(data: any) {
   let flagError = false;
-  const msgErrorParametros = 'ERROR, los parámetros no son validos';
+  const msgErrorParametros = 'Parámetros no validos';
 
   if (data.title === undefined || data.title === '') {
     flagError = true;
@@ -27,7 +28,7 @@ export function guardarFromForm(data) {
   if (flagError) {
     return 400;
   } else {
-    lastID.lastID = lastID.lastID + 1; 
+    lastID.lastID = lastID.lastID + 1; // Se incrementa el lastID por que se va a guarda un nuevo valor.
 
     const objProducto = new Producto(
       data.title,
@@ -41,7 +42,8 @@ export function guardarFromForm(data) {
   }
 }
 
-export function guardarNewMessage(data) {
+//Funcion que se encarga de guardar los mensajes en tanto en la variable dinámica como en el archivo
+export function guardarNewMessage(data: any) {
   let now = new Date();
   let date = moment(now).format('DD/MM/YYYY HH:MM:SS');
   const newMessage = new Message(data.email, date, data.text);

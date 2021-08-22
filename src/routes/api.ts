@@ -1,15 +1,17 @@
 import express from 'express';
-import Producto from './../class/producto.js';
-import { contenido } from '../modules/app.js';
-import { productos, dbIDs, lastID } from '../modules/data.js';
+import Producto from '../class/producto';
+import { contenido } from '../modules/app';
+import { productos, dbIDs, lastID } from '../modules/data';
 
 const router = express.Router();
 
-for (let id = 1; id <= 3; id++) {
+//Creando algunos Productos para pruebas
+//Comentar para verificar el error de no existen productos.
+for (let id = 1; id <= 4; id++) {
   const objDatos = contenido();
   const objProducto = new Producto(
     objDatos.title,
-    objDatos.price,
+    parseFloat(objDatos.price),
     objDatos.thumbnail,
     id
   );
@@ -18,30 +20,37 @@ for (let id = 1; id <= 3; id++) {
   lastID.lastID = id;
 }
 
+/**
+ * DEFINICION RUTAS BASICAS
+ */
+
+//Ruta para Listar todos los producto existentes
 router.get('/productos/listar', (req, res) => {
   if (productos.length < 1) {
     return res.status(400).json({
       error: 'No hay productos cargados',
     });
   }
+
   res.json({
     productos,
   });
 });
 
+//Ruta para listar un producto especifico por su id
 router.get('/productos/listar/:id', (req, res) => {
   const id = parseInt(req.params.id);
 
   if (id < dbIDs[0] || id > dbIDs[dbIDs.length - 1]) {
     return res.status(400).json({
-      error: 'ERROR, producto no encontrado',
+      error: 'Producto no encontrado',
     });
   }
 
   const indexID = dbIDs.findIndex((ID) => ID === id);
   if (indexID === -1) {
     return res.status(400).json({
-      error: 'ERROR, producto no encontrado',
+      error: 'Producto no encontrado',
     });
   }
 
@@ -51,32 +60,33 @@ router.get('/productos/listar/:id', (req, res) => {
   });
 });
 
+//Ruta para guardar un producto nuevo si se cumplen los parámetros necesarios.
 router.post('/guardar', (req, res) => {
   const body = req.body;
-  const msgErrorParametros = 'ERRPR, parámetros no validos';
-  const errorGuardar = (msg) => {
+  const msgErrorParametros = 'Parámetros no validos';
+  const errorGuardar = (msg: string) => {
     return res.status(400).json({
       error: msg,
     });
   };
 
   if (body.title === undefined) {
-    errorGuardar('Title no esta definido');
+    errorGuardar('title no definido');
   }
 
   if (body.price === undefined) {
-    errorGuardar('Precio no esta definido');
+    errorGuardar('Precio no definido');
   }
 
   if (isNaN(parseFloat(body.price))) {
-    errorGuardar('ERROR, el precio no pude ser una letra');
+    errorGuardar('Precio letra');
   }
 
   if (body.thumbnail === undefined) {
-    errorGuardar('No esta definida la imagen');
+    errorGuardar('No imagen');
   }
 
-  lastID.lastID = lastID.lastID + 1;
+  lastID.lastID = lastID.lastID + 1; // Se incrementa el lastID.lastID por que se va a guarda un nuevo valor.
 
   const objProducto = new Producto(
     body.title,
@@ -87,7 +97,9 @@ router.post('/guardar', (req, res) => {
   productos.push(objProducto);
   dbIDs.push(lastID.lastID);
 
+  //Validando si el guarda es usado desde el form o via json/api
   if (body.form === 'true') {
+    //Deprecated el form no se usa desde un submit, se reemplaza por websocket
     res.redirect(301, '/');
   } else {
     res.json({
@@ -96,14 +108,15 @@ router.post('/guardar', (req, res) => {
   }
 });
 
+//Ruta para actualizar un producto si se cumplen los parámetros necesarios.
 router.put('/productos/actualizar/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const body = req.body;
-  const msgErrorID = 'ERROR, producto no encontrado';
-  const msgErrorParametros = 'ERROR,  los parámetros no son validos';
+  const msgErrorID = 'Producto no encontrado';
+  const msgErrorParametros = 'Parámetros no validos';
   let flagUpdate = true;
 
-  const errorGuardar = (msg) => {
+  const errorGuardar = (msg: string) => {
     return res.status(400).json({
       error: msg,
     });
@@ -152,12 +165,13 @@ router.put('/productos/actualizar/:id', (req, res) => {
   }
 });
 
+//Ruta encargada de eliminar un producto
 router.delete('/productos/borrar/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const msgErrorID = 'ERROR, producto no encontrado';
+  const msgErrorID = 'Producto no encontrado';
   let flagDelete = true;
 
-  const errorGuardar = (msg) => {
+  const errorGuardar = (msg: string) => {
     return res.status(400).json({
       error: msg,
     });

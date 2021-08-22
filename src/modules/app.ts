@@ -6,10 +6,12 @@ const publicPathFileName = path.resolve(
   './../../public/messages.txt'
 );
 
-const random = (min, max) => {
+//Función para generar un numero aleatorio partiendo de un intervalo.
+const random = (min: number, max: number) => {
   return Math.random() * (max - min + 1) + min;
 };
 
+//Generando el contenido de la Item.
 const contenido = () => {
   let obj = {
     title: `Producto ${Math.floor(random(1, 10))}`,
@@ -20,13 +22,15 @@ const contenido = () => {
   return obj;
 };
 
-const objToJSON = (contenido) => {
+//stringify el contenido para el Item.
+const objToJSON = (contenido: any) => {
   return JSON.stringify(contenido, undefined, 2);
 };
 
+//Esta funcion se encarga de leer y devolver los mensajes de existir el archivo de mensajes.
 function leerMessages() {
   let filenames = fs.readdirSync(publicPathFolder);
-  const found = filenames.find((element) => 'messages.txt' === element);
+  const found = filenames.find((element: string) => 'messages.txt' === element);
   if (found === 'messages.txt') {
     const data = fs.readFileSync(publicPathFileName, 'utf-8');
     return data;
@@ -35,8 +39,9 @@ function leerMessages() {
   }
 }
 
-function guardarMessages(messages) {
+// Esta función guarda el array de mensajes en un archivo con formato JSON
+function guardarMessages(messages: any) {
   fs.writeFileSync(publicPathFileName, objToJSON(messages), 'utf-8');
 }
 
-export { contenido, objToJSON, leerMessages, guardarMessages };
+export { random, contenido, objToJSON, leerMessages, guardarMessages };
